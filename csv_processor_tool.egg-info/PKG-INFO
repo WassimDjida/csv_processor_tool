@@ -1,0 +1,7 @@
+Metadata-Version: 2.1
+Name: csv_processor_tool
+Version: 0.1
+Summary: A tool to process Sanofi* CSV files
+Home-page: https://github.com/yourusername/csv_processor_tool
+Author: Ouassim
+Requires-Dist: pandas
