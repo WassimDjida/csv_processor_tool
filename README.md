@@ -52,7 +52,7 @@ Step 3: Run the Script
 
 - 1 Run the Script:
 
-In the command prompt or terminal, navigate to the directory where example_script.py is located (if you aren’t already there):
+In the command prompt or terminal, navigate to the directory where example_script.py is located:
 
         cd C:\Users\U1028428\OneDrive - Sanofi\Bureau\csv_processor_tool
 
