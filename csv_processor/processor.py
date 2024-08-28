@@ -48,16 +48,47 @@ class CSVProcessor:
         self.eslide_df.insert(insert_position, 'Biosource ID', self.eslide_df.apply(get_biosource_id, axis=1))
         
         biosource_output = os.path.join(self.output_dir, "Final-BiosourceID.csv")
+        if not os.path.exists(self.output_dir):
+            os.makedirs(self.output_dir)
         self.eslide_df.to_csv(biosource_output, index=False)
         print(f"Biosource ID added and file saved as {biosource_output}")
 
     def merge_and_map(self):
-        self.biotracker_df['ID'] = self.biotracker_df['ID'].str.split('-').str[0]
-        tissue_type_map = self.biotracker_df.set_index('ID')['Tissue Type'].to_dict()
-        supplier_diagnosis_map = self.biotracker_df.set_index('ID')['SupplierMicroscopicDiagnos.SL'].to_dict()
+        # Normalize the ID column to extract the 3-letter, 6-digit pattern
+        def normalize_id(id_value):
+            if isinstance(id_value, str):  # Ensure the ID is a string
+                match = re.search(r'[A-Za-z]{3}\d{6}', id_value)
+                return match.group(0) if match else None
+            return None  # Return None if the value is not a string
         
-        self.eslide_df['Tissues Biosource'] = self.eslide_df['Biosource ID'].map(tissue_type_map)
-        self.eslide_df['Pathology'] = self.eslide_df['Biosource ID'].map(supplier_diagnosis_map)
+        # Create mappings based on the normalized ID
+        self.biotracker_df['Base ID'] = self.biotracker_df['ID'].apply(normalize_id)
+        tissue_type_map = self.biotracker_df.groupby('Base ID')['Tissue Type'].first().to_dict()
+        supplier_diagnosis_map = self.biotracker_df.groupby('Base ID')['SupplierMicroscopicDiagnos.SL'].first().to_dict()
+        pri_sup_case_diag_map = self.biotracker_df.groupby('Base ID')['Pri.Sup.CaseDiagnosis-DL'].first().to_dict()
+
+        # Map the Tissues Biosource column from the Tissue Type
+        self.eslide_df['Tissues Biosource'] = self.eslide_df['Biosource ID'].apply(lambda id_val: tissue_type_map.get(normalize_id(id_val), None))
+        
+        # Use the normalized ID internally for mapping Pathology
+        def map_pathology(row):
+            normalized_id = normalize_id(row['Biosource ID'])
+            supplier_diag = supplier_diagnosis_map.get(normalized_id, None)
+            pri_sup_diag = pri_sup_case_diag_map.get(normalized_id, None)
+            
+            if pd.notna(supplier_diag) and supplier_diag.strip():
+                return supplier_diag
+            elif pd.notna(pri_sup_diag) and pri_sup_diag.strip():
+                return pri_sup_diag
+            else:
+                return None
+        
+        self.eslide_df['Pathology'] = self.eslide_df.apply(map_pathology, axis=1)
+        
+        # Insert the "Biosource Pathology" column right after the "Pathology" column
+        pathology_position = self.eslide_df.columns.get_loc("Pathology") + 1
+        self.eslide_df.insert(pathology_position, 'Biosource Pathology', self.eslide_df.apply(
+            lambda row: pri_sup_case_diag_map.get(normalize_id(row['Biosource ID']), None), axis=1))
         
         merge_output = os.path.join(self.output_dir, "eSlide-Biosource-Merge.csv")
         self.eslide_df.to_csv(merge_output, index=False)
