@@ -10,9 +10,9 @@ Fonctionnalités
 Installation
 Clonez le dépôt et installez le package :
 
-git clone https://github.com/votrenomutilisateur/csv_processor_tool.git
+'git clone https://github.com/votrenomutilisateur/csv_processor_tool.git
 cd csv_processor_tool
-pip install .
+pip install .'
 
 Comment Utiliser l'Outil
 
