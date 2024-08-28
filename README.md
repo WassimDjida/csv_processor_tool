@@ -67,31 +67,41 @@ Once the script has run, navigate to the output directory you specified. You sho
 Final-BiosourceID.csv
 eSlide-Biosource-Merge.csv
 Filtered_Final_Merge.csv
+
+
 Detailed Explanation of the Tool
+
 1. Load Data
 The tool loads two CSV files:
-
 eSlide_Final.csv: Contains information related to biosource samples.
 Biotracker_Extract.csv: Contains additional data such as tissue type and diagnostic information needed for merging.
+
 2. Add Biosource ID
 The tool adds a new column, Biosource ID, to the eSlide_Final.csv data based on the following logic:
 
-If the Specie is Human (or the field is empty) and the Scan Status is Success, the tool checks the Sample column.
-If the Sample value does not contain the words "cell" or "tum" and matches specific patterns, a new Biosource ID is generated.
-The Biosource ID is formatted for consistency, e.g., converting ABC123 to ABC000123.
+- If the Specie is Human (or the field is empty) and the Scan Status is Success, the tool checks the Sample column.
+- If the Sample value does not contain the words "cell" or "tum" and matches specific patterns, a new Biosource ID is generated.
+- The Biosource ID is formatted for consistency, e.g., converting ABC123 to ABC000123.
+
+  
 3. Merge and Map Data
 The tool performs the following operations:
 
-Normalize IDs: Extracts a 3-letter, 6-digit pattern from IDs (e.g., STR001322 from STR001322-001 or EU-AST000212), ignoring prefixes like EU- or suffixes like -001.
-Map Tissues Biosource: The Tissues Biosource column is mapped using the Tissue Type from Biotracker_Extract.csv.
-Map Pathology: The Pathology column is mapped from SupplierMicroscopicDiagnos.SL. If this value is missing, it falls back to Pri.Sup.CaseDiagnosis-DL.
-Add Biosource Pathology: A new column Biosource Pathology is added right after Pathology, containing the value from Pri.Sup.CaseDiagnosis-DL.
+- Normalize IDs: Extracts a 3-letter, 6-digit pattern from IDs (e.g., STR001322 from STR001322-001 or EU-AST000212), ignoring prefixes like EU- or suffixes like -001.
+- Map Tissues Biosource: The Tissues Biosource column is mapped using the Tissue Type from Biotracker_Extract.csv.
+- Map Pathology: The Pathology column is mapped from SupplierMicroscopicDiagnos.SL. If this value is missing, it falls back to Pri.Sup.CaseDiagnosis-DL.
+- Add Biosource Pathology: A new column Biosource Pathology is added right after Pathology, containing the value from Pri.Sup.CaseDiagnosis-DL.
+
+  
 4. Filter Data
 The tool filters the data to include only rows where the Biosource ID is not empty. This filtered data is saved as a separate file.
 
 Final Output Files
-Final-BiosourceID.csv: Contains the eSlide_Final.csv data with the added Biosource ID column.
-eSlide-Biosource-Merge.csv: The final merged file containing the mapped Tissues Biosource, Pathology, and Biosource Pathology columns.
-Filtered_Final_Merge.csv: A filtered version of the merged file, containing only rows with a valid Biosource ID.
+
+- Final-BiosourceID.csv: Contains the eSlide_Final.csv data with the added Biosource ID column.
+- eSlide-Biosource-Merge.csv: The final merged file containing the mapped Tissues Biosource, Pathology, and Biosource Pathology columns.
+- Filtered_Final_Merge.csv: A filtered version of the merged file, containing only rows with a valid Biosource ID.
+
+  
 This tool automates complex data processing tasks, ensuring accuracy and consistency in the final output files.
 
